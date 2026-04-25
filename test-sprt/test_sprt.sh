@@ -18,7 +18,7 @@ PGNOUT="$WORK_DIR/output/games.pgn"
 CONFIG_FILE="$WORK_DIR/sprt_presets.ini"
 
 [[ -f "$ENGINE1" ]] && echo "✓ Engine 1 found" || { echo "✗ Engine 1 missing: $ENGINE1"; exit 1; }
-[[ -f "$ENGINE2" ]] && echo "✓ Engine 2 found" || { echo "✗ Engine 2 missing: $ENGINE1"; exit 1; }
+[[ -f "$ENGINE2" ]] && echo "✓ Engine 2 found" || { echo "✗ Engine 2 missing: $ENGINE2"; exit 1; }
 [[ -f "$CONFIG_FILE" ]] || { echo "✗ Config file missing: $CONFIG_FILE"; exit 1; }
 
 : > "$PGNOUT"
