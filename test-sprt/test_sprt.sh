@@ -49,7 +49,7 @@ echo "Time control: $TC, Games: $GAMES, Concurrency: $CONCURRENCY"
   -event "Hackathon SPRT $INPUT_ARG1 vs $INPUT_ARG2" \
   -engine cmd=java arg=-jar arg="$ENGINE2" proto=uci name="Engine_change_v$INPUT_ARG2" \
   -engine cmd=java arg=-jar arg="$ENGINE1" proto=uci name="Engine_base_v$INPUT_ARG1" \
-  -each tc=$TC -games $GAMES -concurrency $CONCURRENCY -wait 2000 \
+  -each tc=$TC -games $GAMES -concurrency $CONCURRENCY -wait 10000 \
   -sprt elo0="$elo0" elo1="$elo1" alpha="$alpha" beta="$beta" \
   -openings file=8moves_v3.pgn format=pgn order=random \
   -pgnout "$PGNOUT" min fi
