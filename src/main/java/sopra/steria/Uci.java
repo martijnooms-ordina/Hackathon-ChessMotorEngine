@@ -175,10 +175,8 @@ public class Uci {
             try {
                 int moveTime;
                 if (time > 0) {
-                    moveTime = Math.min(time / 30 + inc / 2, time / 2);
-                    int reserve = Math.max(30, time / 30);
-                    moveTime = Math.max(50, Math.min(moveTime, time - reserve));
-                    moveTime = (int)(moveTime * 0.90);
+                    moveTime = Math.min(time / 30 + inc, time / 2);
+                    moveTime = Math.max(10, Math.min(moveTime, time - 10));
                 } else {
                     moveTime = 60000; // 60 seconds default
                 }
