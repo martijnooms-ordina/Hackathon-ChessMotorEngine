@@ -21,6 +21,8 @@ For competing, fork this repository. Please refer to the [Repository use for hac
   * [SPRT testing](#sprt-testing)
     * [Using SPRT tests](#using-sprt-tests)
       * [test_sprt.sh parameters](#test_sprtsh-parameters)
+* [Bonus](#bonus)
+  * [Profiles](#profiles)
 <!-- TOC -->
 
 # Scope of Hackathon
@@ -56,6 +58,7 @@ mvn clean package
   - One as `Hackathon-ChessEngine-1.0.jar` (your base version)
 6. Run the SPRT tests to make sure everything is working:
 ```shell
+# first go into the folder, 'cd test-sprt'
 docker compose up --build
 # or
 podman compose up --build
@@ -142,6 +145,7 @@ If you built different versions, change the parameters accordingly in the `docke
 
 Rebuild image to pick up the engines:
 ```shell
+# first go into the folder, 'cd test-sprt'
 docker compose up --build
 # or podman:
 podman compose up --build
