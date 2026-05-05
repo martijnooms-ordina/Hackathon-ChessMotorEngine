@@ -32,10 +32,14 @@ get_config_value() {
 TC=$(get_config_value "tc")
 GAMES=$(get_config_value "games")
 CONCURRENCY=$(get_config_value "concurrency")
+TSCALE=$(get_config_value "tscale")
 elo0=$(get_config_value "elo0")
 elo1=$(get_config_value "elo1")
 alpha=$(get_config_value "alpha")
 beta=$(get_config_value "beta")
+
+# Default timeout scaling is 1 (no scaling) when not specified in preset.
+TSCALE=${TSCALE:-1}
 
 if [[ -z "$TC" || -z "$GAMES" || -z "$CONCURRENCY" || -z "$elo0" || -z "$elo1" || -z "$alpha" || -z "$beta" ]]; then
   echo "✗ Failed to read preset: $PRESET"
@@ -43,13 +47,13 @@ if [[ -z "$TC" || -z "$GAMES" || -z "$CONCURRENCY" || -z "$elo0" || -z "$elo1" |
 fi
 
 echo "Running SPRT with preset: $PRESET"
-echo "Time control: $TC, Games: $GAMES, Concurrency: $CONCURRENCY"
+echo "Time control: $TC, Games: $GAMES, Concurrency: $CONCURRENCY, Timeout scale: $TSCALE"
 
 ./cutechess-cli \
   -event "Hackathon SPRT $INPUT_ARG1 vs $INPUT_ARG2" \
   -engine cmd=java arg=-jar arg="$ENGINE2" proto=uci name="Engine_change_v$INPUT_ARG2" \
   -engine cmd=java arg=-jar arg="$ENGINE1" proto=uci name="Engine_base_v$INPUT_ARG1" \
-  -each tc=$TC -games $GAMES -concurrency $CONCURRENCY -wait 10 \
+  -each tc=$TC tscale=$TSCALE -games $GAMES -concurrency $CONCURRENCY -wait 10 \
   -sprt elo0="$elo0" elo1="$elo1" alpha="$alpha" beta="$beta" \
   -openings file=8moves_v3.pgn format=pgn order=random \
   -pgnout "$PGNOUT" min fi
