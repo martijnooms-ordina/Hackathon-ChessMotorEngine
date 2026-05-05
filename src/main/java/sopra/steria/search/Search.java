@@ -5,7 +5,7 @@ import knight.clubbing.core.BMove;
 import knight.clubbing.movegen.MoveGenerator;
 import sopra.steria.evaluation.BetterEvaluator;
 import sopra.steria.evaluation.Evaluator;
-import sopra.steria.ordering.BadMoveOrderer;
+import sopra.steria.ordering.BetterMoveOrderer;
 import sopra.steria.ordering.MoveOrderer;
 
 import static sopra.steria.EngineConst.INF;
@@ -23,7 +23,7 @@ public class Search {
 
     public Search() {
         this.evaluator = new BetterEvaluator();
-        this.moveOrderer = new BadMoveOrderer();
+        this.moveOrderer = new BetterMoveOrderer();
     }
 
     public SearchResult bestMove(BBoard board, SearchSetting setting) {

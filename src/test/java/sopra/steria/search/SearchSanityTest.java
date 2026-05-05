@@ -29,6 +29,7 @@ class SearchSanityTest {
         assertNotNull(result, "Search should return a result");
         assertNotNull(result.getBestMove(), "Search should return a best move");
         assertFalse(result.getBestMove().isEmpty(), "Best move should not be empty");
+        assertEquals("b1c3", result.getBestMove(), "Best move not as expected");
 
         assertTrue(isLegal(board, result), "Best move should be a legal move");
     }
