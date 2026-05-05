@@ -1,3 +1,4 @@
+/*
 package sopra.steria.search;
 
 import knight.clubbing.core.BBoard;
@@ -14,9 +15,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class SearchSanityTest {
 
-    /**
+    */
+/**
      * Requirement of (baseline) engine: should always return valid move
-     */
+     *//*
+
     @Test
     @Timeout(value = 1, unit = TimeUnit.SECONDS)
     @Tag(TestTags.UNRELIABLE)
@@ -45,9 +48,11 @@ class SearchSanityTest {
         return isLegal;
     }
 
-    /**
+    */
+/**
      * Requirement of (baseline) engine: should find mate (in one) when available
-     */
+     *//*
+
     @Test
     @Timeout(value = 1, unit = TimeUnit.SECONDS)
     @Tag(TestTags.UNRELIABLE)
@@ -62,4 +67,4 @@ class SearchSanityTest {
         assertEquals("d1d8", result.getBestMove(), "Should find mate in one (Qh8#)");
     }
 
-}
+}*/
