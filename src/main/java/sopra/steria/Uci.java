@@ -31,17 +31,24 @@ public class Uci {
     private Thread searchThread;
     private Search search;
     private boolean enableLogging;
+    private static volatile boolean engineInitialized;
 
     public Uci(boolean enableLogging) {
         this.enableLogging = enableLogging;
-
-        initEngine();
     }
 
     private static void initEngine() {
         PrecomputedMoveData.getInstance();
         @SuppressWarnings("unused")
         var unused = PrecomputedMagics.ROOK_MAGICS;
+    }
+
+    private static synchronized void ensureEngineInitialized() {
+        if (engineInitialized) {
+            return;
+        }
+        initEngine();
+        engineInitialized = true;
     }
 
     public Uci() {
@@ -73,6 +80,7 @@ public class Uci {
                 break;
             }
             case "isready": {
+                ensureEngineInitialized();
                 sendCommand("readyok");
                 break;
             }
@@ -140,6 +148,7 @@ public class Uci {
     }
 
     protected void handleGo(String line) {
+        ensureEngineInitialized();
         int wtime = -1, btime = -1, winc = 0, binc = 0, depthInput = -1;
         boolean whiteToMove = board.isWhiteToMove();
 
