@@ -185,6 +185,7 @@ against the previous version or against Stockfish at fixed Elo.
 | MVV-LVA | Most Valuable Victim – Least Valuable Attacker for captures |
 | Promotion bonus | Queen promotions tried before other moves |
 | Castle bonus | Castling moves prioritised over random quiet moves |
+| History heuristic | `historyTable[from][to]` accumulates cutoff weight (depth²) per quiet move; persists across moves in the same game |
 | Insertion sort | Replaces the original bubble sort |
 
 ### Search (`Search`)
@@ -197,6 +198,7 @@ against the previous version or against Stockfish at fixed Elo.
 | Contempt factor | Draw by repetition scored as -10 cp instead of 0 |
 | Opening book | Hardcoded first 2-4 moves for common openings (1.e4, Italian, etc.) |
 | Search depth | Increased from 6 to 7 |
+| Move ordering priority | TT move → Killers → MVV-LVA captures → History-ordered quiet moves |
 
 ## Performance vs Stockfish (10 games, 10s+0.1s increment)
 
@@ -206,7 +208,20 @@ against the previous version or against Stockfish at fixed Elo.
 | 1800 | 75% (approx.) | +107 |
 | 2000 | 80% (7W/1L/2D) | +241 |
 
-Estimated engine strength: **~2200 Elo**
+Estimated engine strength: **~2200+ Elo**
+
+## Improvement progression (vs hackathon reference engine)
+
+| Phase | Win% | Score |
+|---|---|---|
+| BadEvaluator (baseline) | 7% | ~26% |
+| + Quiescence search | 21% | ~52% |
+| + Transposition table | 38% | ~66% |
+| + Killer moves | 47% | ~69% |
+| + Null move pruning + Contempt | 45% | ~68% |
+| + Depth 7 | 52% | ~75% |
+| + Opening book | 50% | ~72% |
+| + History heuristic | **63%** | **~79%** |
 
 ## Testing vs Stockfish
 

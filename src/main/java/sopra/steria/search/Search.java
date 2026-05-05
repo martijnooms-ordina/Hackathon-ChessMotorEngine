@@ -7,7 +7,6 @@ import knight.clubbing.movegen.MoveGenerator;
 import sopra.steria.evaluation.BetterEvaluator;
 import sopra.steria.evaluation.Evaluator;
 import sopra.steria.ordering.BetterMoveOrderer;
-import sopra.steria.ordering.MoveOrderer;
 
 import static sopra.steria.EngineConst.INF;
 import static sopra.steria.EngineConst.MATE_SCORE;
@@ -21,7 +20,7 @@ public class Search {
     private long nodes;
 
     private final Evaluator evaluator;
-    private final MoveOrderer moveOrderer;
+    private final BetterMoveOrderer moveOrderer;
 
     /**
      * Shared transposition table – static so it persists across iterative-deepening
@@ -33,6 +32,17 @@ public class Search {
     private static final OpeningBook openingBook = new OpeningBook();
 
     /**
+     * History table: historyTable[from][to] accumulates how often the quiet
+     * move from→to caused a beta-cutoff. Static so it persists across moves
+     * within the same game session, allowing the engine to learn which quiet
+     * moves are generally good in the current game.
+     * Values are capped at HISTORY_MAX to prevent overflow and ensure captures
+     * always outrank quiet moves in the orderer.
+     */
+    private static final int     HISTORY_MAX   = 900; // stays below CASTLE_BONUS=1000
+    private static final int[][] historyTable  = new int[64][64];
+
+    /**
      * Killer moves: up to 2 quiet moves per ply that recently caused a beta-cutoff
      * in a sibling node. They are tried just after the TT move, before other quiet
      * moves, because they are likely to be good in the current node too.
@@ -41,8 +51,9 @@ public class Search {
     private final short[][] killerMoves = new short[64][2];
 
     public Search() {
-        this.evaluator = new BetterEvaluator();
+        this.evaluator  = new BetterEvaluator();
         this.moveOrderer = new BetterMoveOrderer();
+        this.moveOrderer.setHistoryTable(historyTable);
     }
 
     public SearchResult bestMove(BBoard board, SearchSetting setting) {
@@ -207,7 +218,14 @@ public class Search {
             }
             alpha = Math.max(alpha, score);
             if (alpha >= beta) {
-                if (isQuiet) storeKiller(move.value(), ply);
+                if (isQuiet) {
+                    storeKiller(move.value(), ply);
+                    // History heuristic: reward quiet moves that cause cutoffs.
+                    // Use depth² so deeper cutoffs are weighted more heavily.
+                    int from = move.startSquare(), to = move.targetSquare();
+                    historyTable[from][to] = Math.min(
+                            historyTable[from][to] + depth * depth, HISTORY_MAX);
+                }
                 break;
             }
         }

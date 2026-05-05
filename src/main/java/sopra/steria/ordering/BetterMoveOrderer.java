@@ -22,10 +22,23 @@ import sopra.steria.values.PieceValues;
  */
 public class BetterMoveOrderer implements MoveOrderer {
 
-    // Base offsets ensure the categories never overlap
+    // Base offsets ensure the categories never overlap.
+    // Quiet-move history scores are in [0, HISTORY_MAX] < CASTLE_BONUS < CAPTURE_BONUS.
     private static final int PROMOTION_BONUS = 20_000;
     private static final int CAPTURE_BONUS   = 10_000;
-    private static final int CASTLE_BONUS    =    500;
+    private static final int CASTLE_BONUS    =  1_000;
+
+    /**
+     * History table shared with Search. historyTable[from][to] reflects how
+     * often that quiet move caused a beta-cutoff across the search tree.
+     * Null when no history is available (falls back to score 0 for quiet moves).
+     */
+    private int[][] historyTable = null;
+
+    /** Called once by Search to wire up the shared history table. */
+    public void setHistoryTable(int[][] historyTable) {
+        this.historyTable = historyTable;
+    }
 
     @Override
     public void orderMoves(BMove[] moves, BBoard board) {
@@ -70,7 +83,12 @@ public class BetterMoveOrderer implements MoveOrderer {
             return CASTLE_BONUS;
         }
 
-        // ── Quiet moves ───────────────────────────────────────────────────────
+        // ── Quiet moves: ordered by history score ─────────────────────────────
+        // Moves that frequently caused beta-cutoffs get a higher score and are
+        // tried earlier, maximising alpha-beta pruning.
+        if (historyTable != null) {
+            return historyTable[move.startSquare()][move.targetSquare()];
+        }
         return 0;
     }
 
