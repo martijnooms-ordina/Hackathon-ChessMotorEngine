@@ -3,6 +3,7 @@ package sopra.steria.evaluation;
 import knight.clubbing.core.BBoard;
 import knight.clubbing.core.BBoardHelper;
 import knight.clubbing.core.BPiece;
+import sopra.steria.values.PieceValues;
 
 /**
  * Improved evaluator with:
@@ -17,15 +18,6 @@ import knight.clubbing.core.BPiece;
  *   For BLACK pieces at engine square sq: pstIndex = sq
  */
 public class BetterEvaluator implements Evaluator {
-
-    // -------------------------------------------------------------------------
-    // Piece values
-    // -------------------------------------------------------------------------
-    private static final int PAWN_VALUE   = 100;
-    private static final int KNIGHT_VALUE = 320;
-    private static final int BISHOP_VALUE = 330;
-    private static final int ROOK_VALUE   = 500;
-    private static final int QUEEN_VALUE  = 900;
 
     // -------------------------------------------------------------------------
     // Bonuses / penalties
@@ -128,7 +120,7 @@ public class BetterEvaluator implements Evaluator {
      * Used to compute the game phase (0 = full midgame, 1 = full endgame).
      */
     private static final int MAX_PHASE_MATERIAL =
-            2 * (2 * KNIGHT_VALUE + 2 * BISHOP_VALUE + 2 * ROOK_VALUE + QUEEN_VALUE);
+            2 * (2 * PieceValues.KNIGHT_VALUE + 2 * PieceValues.BISHOP_VALUE + 2 * PieceValues.ROOK_VALUE + PieceValues.QUEEN_VALUE);
 
     // =========================================================================
     // Evaluator interface
@@ -158,11 +150,11 @@ public class BetterEvaluator implements Evaluator {
         int score = 0;
 
         // Material + Piece-Square Tables
-        score += sumPieces(pawns,   PAWN_VALUE,   PAWN_PST,   isWhite);
-        score += sumPieces(knights, KNIGHT_VALUE, KNIGHT_PST, isWhite);
-        score += sumPieces(bishops, BISHOP_VALUE, BISHOP_PST, isWhite);
-        score += sumPieces(rooks,   ROOK_VALUE,   ROOK_PST,   isWhite);
-        score += sumPieces(queens,  QUEEN_VALUE,  QUEEN_PST,  isWhite);
+        score += sumPieces(pawns,   PieceValues.PAWN_VALUE,   PAWN_PST,   isWhite);
+        score += sumPieces(knights, PieceValues.KNIGHT_VALUE, KNIGHT_PST, isWhite);
+        score += sumPieces(bishops, PieceValues.BISHOP_VALUE, BISHOP_PST, isWhite);
+        score += sumPieces(rooks,   PieceValues.ROOK_VALUE,   ROOK_PST,   isWhite);
+        score += sumPieces(queens,  PieceValues.QUEEN_VALUE,  QUEEN_PST,  isWhite);
 
         // King safety: taper between middlegame and endgame PST
         int kingSq    = board.getKingSquare(colorIndex);
@@ -262,10 +254,10 @@ public class BetterEvaluator implements Evaluator {
     private float getGamePhase(BBoard board) {
         int material = 0;
         for (int color : new int[]{BPiece.white, BPiece.black}) {
-            material += KNIGHT_VALUE * Long.bitCount(board.getBitboard(BPiece.makePiece(BPiece.knight, color)));
-            material += BISHOP_VALUE * Long.bitCount(board.getBitboard(BPiece.makePiece(BPiece.bishop, color)));
-            material += ROOK_VALUE   * Long.bitCount(board.getBitboard(BPiece.makePiece(BPiece.rook,   color)));
-            material += QUEEN_VALUE  * Long.bitCount(board.getBitboard(BPiece.makePiece(BPiece.queen,  color)));
+            material += PieceValues.KNIGHT_VALUE * Long.bitCount(board.getBitboard(BPiece.makePiece(BPiece.knight, color)));
+            material += PieceValues.BISHOP_VALUE * Long.bitCount(board.getBitboard(BPiece.makePiece(BPiece.bishop, color)));
+            material += PieceValues.ROOK_VALUE   * Long.bitCount(board.getBitboard(BPiece.makePiece(BPiece.rook,   color)));
+            material += PieceValues.QUEEN_VALUE  * Long.bitCount(board.getBitboard(BPiece.makePiece(BPiece.queen,  color)));
         }
         return 1.0f - Math.min(1.0f, (float) material / MAX_PHASE_MATERIAL);
     }
