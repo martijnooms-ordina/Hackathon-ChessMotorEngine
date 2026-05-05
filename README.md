@@ -162,6 +162,78 @@ The docker image runs the `test_sprt.sh` as entrypoint with 3 parameters:
 
 In the docker-compose.yml file you can change these parameters.
 
+# Performance Improvements
+
+Starting from the `BadEvaluator` (all pieces worth 100 cp, no positional knowledge), the following
+improvements were implemented during the hackathon. Each step was validated by playing matches
+against the previous version or against Stockfish at fixed Elo.
+
+## Implemented features
+
+### Evaluation (`BetterEvaluator`)
+| Feature | Description |
+|---|---|
+| Piece values | Pawn 100, Knight 320, Bishop 330, Rook 500, Queen 900 cp |
+| Piece-Square Tables | Michniewski simplified evaluation tables for all piece types |
+| Game-phase tapering | King PST interpolated between middlegame and endgame tables |
+| Pawn structure | Doubled pawn penalty, isolated pawn penalty, passed pawn bonus |
+| Bishop pair bonus | +30 cp when both bishops are present |
+
+### Move ordering (`BetterMoveOrderer`)
+| Feature | Description |
+|---|---|
+| MVV-LVA | Most Valuable Victim – Least Valuable Attacker for captures |
+| Promotion bonus | Queen promotions tried before other moves |
+| Castle bonus | Castling moves prioritised over random quiet moves |
+| Insertion sort | Replaces the original bubble sort |
+
+### Search (`Search`)
+| Feature | Description |
+|---|---|
+| Quiescence search | Captures-only search at leaf nodes to eliminate horizon effect |
+| Transposition table | 16 MB hash table (1M entries) with always-replace strategy |
+| Killer moves | 2 quiet cutoff moves stored per ply, tried before other quiet moves |
+| Null move pruning | R=2 reduction; skipped in check, endgame, and after another null move |
+| Contempt factor | Draw by repetition scored as -10 cp instead of 0 |
+| Opening book | Hardcoded first 2-4 moves for common openings (1.e4, Italian, etc.) |
+| Search depth | Increased from 6 to 7 |
+
+## Performance vs Stockfish (10 games, 10s+0.1s increment)
+
+| Stockfish Elo | Score | Elo difference |
+|---|---|---|
+| 1500 | 90% (9W/1L/0D) | +382 |
+| 1800 | 75% (approx.) | +107 |
+| 2000 | 80% (7W/1L/2D) | +241 |
+
+Estimated engine strength: **~2200 Elo**
+
+## Testing vs Stockfish
+
+A convenience script is included to run matches against Stockfish:
+
+```shell
+# Requires: brew install stockfish
+# Requires: cutechess-cli built in /tmp/cutechess-build/
+
+# 10 games vs Stockfish 1500 (default)
+./test-vs-stockfish.sh
+
+# 20 games vs Stockfish 1800
+./test-vs-stockfish.sh 1800 20
+
+# 10 games vs Stockfish 2000 with shorter time control
+./test-vs-stockfish.sh 2000 10 5+0.05
+```
+
+Build cutechess-cli (one-time setup):
+```shell
+brew install qt@6 cmake
+git clone --depth=1 https://github.com/cutechess/cutechess.git /tmp/cutechess
+cmake -S /tmp/cutechess -B /tmp/cutechess-build -DCMAKE_PREFIX_PATH=$(brew --prefix qt@6)
+cmake --build /tmp/cutechess-build -j4
+```
+
 # Bonus
 
 ## Profiles

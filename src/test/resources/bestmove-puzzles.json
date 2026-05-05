@@ -31,7 +31,7 @@
     {
       "fen": "6k1/4Qp2/4p1BK/4q3/1p4P1/8/8/8 b - - 0 1",
       "bestMoves": [
-        "e6g7"
+        "e5g7"
       ],
       "description": "Black can capture the bishop by checking the king."
     },
@@ -109,7 +109,7 @@
     {
       "fen": "8/p7/6pp/p2kpp1P/5PP1/N4K2/8/8 b - - 0 1",
       "bestMoves": [
-        "f5f4"
+        "f5g4"
       ],
         "description": "Black can create a passed pawn by exchanging pawns at g4 then h5, winning the endgame."
     },
