@@ -3,7 +3,7 @@ package sopra.steria.ordering;
 import knight.clubbing.core.BBoard;
 import knight.clubbing.core.BBoardHelper;
 import knight.clubbing.core.BMove;
-import knight.clubbing.core.BPiece;
+import sopra.steria.ordering.MVVLVA.GoodMVVLVA;
 
 public class BadMoveOrderer implements MoveOrderer {
 
@@ -21,15 +21,19 @@ public class BadMoveOrderer implements MoveOrderer {
     private int score(BMove move, BBoard board) {
         int score = 0;
 
+        //what piece
         int movingPiece = board.getPieceBoards()[move.startSquare()];
 
         int rank = BBoardHelper.rankIndex(move.startSquare());
 
-        // Oooh me move knight!
-        if (BPiece.getPieceType(movingPiece) == BPiece.knight)
-            score += 500;
+        //if target squaire not empty, calc MVVLVA
+        int capturePiece = board.getPieceBoards()[move.targetSquare()];
+        int mvvLvaScore = GoodMVVLVA.MVVLVAScore(capturePiece, movingPiece);
+        score += mvvLvaScore;
 
-        // Me want to move forward!
+
+        // 250 points if the move is a pawn move to the center (rank 5 for white, rank 2 for black)
+        //wtf is rank
         if (board.isWhiteToMove() && rank == 5 || !board.isWhiteToMove() && rank == 2)
             score += 250;
 
