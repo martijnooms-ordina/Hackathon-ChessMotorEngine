@@ -3,6 +3,7 @@ package sopra.steria.evaluation;
 import knight.clubbing.core.BBoard;
 import knight.clubbing.core.BBoardHelper;
 import knight.clubbing.core.BPiece;
+import sopra.steria.values.PSTValues;
 import sopra.steria.values.PieceValues;
 
 /**
@@ -26,94 +27,6 @@ public class BetterEvaluator implements Evaluator {
     private static final int DOUBLED_PAWN_PENALTY  = -20;  // per extra pawn on a file
     private static final int ISOLATED_PAWN_PENALTY = -15;  // no friendly pawns on adjacent files
     private static final int PASSED_PAWN_BONUS     =  20;  // multiplied by ranks advanced
-
-    // -------------------------------------------------------------------------
-    // Piece-Square Tables  (rank 8 at index 0, rank 1 at index 56)
-    // -------------------------------------------------------------------------
-
-    /** Pawn – reward central advancement, punish backward/doubled starts */
-    private static final int[] PAWN_PST = {
-         0,  0,  0,  0,  0,  0,  0,  0,  // rank 8 (promotion rank – no pawn here)
-        50, 50, 50, 50, 50, 50, 50, 50,  // rank 7 (one step from promotion)
-        10, 10, 20, 30, 30, 20, 10, 10,  // rank 6
-         5,  5, 10, 25, 25, 10,  5,  5,  // rank 5
-         0,  0,  0, 20, 20,  0,  0,  0,  // rank 4
-         5, -5,-10,  0,  0,-10, -5,  5,  // rank 3
-         5, 10, 10,-20,-20, 10, 10,  5,  // rank 2 (starting rank)
-         0,  0,  0,  0,  0,  0,  0,  0   // rank 1 (no pawn here)
-    };
-
-    /** Knight – "a knight on the rim is dim" */
-    private static final int[] KNIGHT_PST = {
-        -50,-40,-30,-30,-30,-30,-40,-50,
-        -40,-20,  0,  0,  0,  0,-20,-40,
-        -30,  0, 10, 15, 15, 10,  0,-30,
-        -30,  5, 15, 20, 20, 15,  5,-30,
-        -30,  0, 15, 20, 20, 15,  0,-30,
-        -30,  5, 10, 15, 15, 10,  5,-30,
-        -40,-20,  0,  5,  5,  0,-20,-40,
-        -50,-40,-30,-30,-30,-30,-40,-50
-    };
-
-    /** Bishop – open diagonals, avoid corners */
-    private static final int[] BISHOP_PST = {
-        -20,-10,-10,-10,-10,-10,-10,-20,
-        -10,  0,  0,  0,  0,  0,  0,-10,
-        -10,  0,  5, 10, 10,  5,  0,-10,
-        -10,  5,  5, 10, 10,  5,  5,-10,
-        -10,  0, 10, 10, 10, 10,  0,-10,
-        -10, 10, 10, 10, 10, 10, 10,-10,
-        -10,  5,  0,  0,  0,  0,  5,-10,
-        -20,-10,-10,-10,-10,-10,-10,-20
-    };
-
-    /** Rook – reward 7th rank and central files */
-    private static final int[] ROOK_PST = {
-         0,  0,  0,  0,  0,  0,  0,  0,  // rank 8
-         5, 10, 10, 10, 10, 10, 10,  5,  // rank 7 – dominant rook rank
-        -5,  0,  0,  0,  0,  0,  0, -5,
-        -5,  0,  0,  0,  0,  0,  0, -5,
-        -5,  0,  0,  0,  0,  0,  0, -5,
-        -5,  0,  0,  0,  0,  0,  0, -5,
-        -5,  0,  0,  0,  0,  0,  0, -5,
-         0,  0,  0,  5,  5,  0,  0,  0   // rank 1 – centralize file
-    };
-
-    /** Queen – flexible, avoid early development to the rim */
-    private static final int[] QUEEN_PST = {
-        -20,-10,-10, -5, -5,-10,-10,-20,
-        -10,  0,  0,  0,  0,  0,  0,-10,
-        -10,  0,  5,  5,  5,  5,  0,-10,
-         -5,  0,  5,  5,  5,  5,  0, -5,
-          0,  0,  5,  5,  5,  5,  0, -5,
-        -10,  5,  5,  5,  5,  5,  0,-10,
-        -10,  0,  5,  0,  0,  0,  0,-10,
-        -20,-10,-10, -5, -5,-10,-10,-20
-    };
-
-    /** King middlegame – castle and hide behind pawns */
-    private static final int[] KING_MG_PST = {
-        -30,-40,-40,-50,-50,-40,-40,-30,
-        -30,-40,-40,-50,-50,-40,-40,-30,
-        -30,-40,-40,-50,-50,-40,-40,-30,
-        -30,-40,-40,-50,-50,-40,-40,-30,
-        -20,-30,-30,-40,-40,-30,-30,-20,
-        -10,-20,-20,-20,-20,-20,-20,-10,
-         20, 20,  0,  0,  0,  0, 20, 20,
-         20, 30, 10,  0,  0, 10, 30, 20
-    };
-
-    /** King endgame – centralize */
-    private static final int[] KING_EG_PST = {
-        -50,-40,-30,-20,-20,-30,-40,-50,
-        -30,-20,-10,  0,  0,-10,-20,-30,
-        -30,-10, 20, 30, 30, 20,-10,-30,
-        -30,-10, 30, 40, 40, 30,-10,-30,
-        -30,-10, 30, 40, 40, 30,-10,-30,
-        -30,-10, 20, 30, 30, 20,-10,-30,
-        -30,-30,  0,  0,  0,  0,-30,-30,
-        -50,-30,-30,-30,-30,-30,-30,-50
-    };
 
     /**
      * Maximum non-pawn, non-king material for both sides combined.
@@ -150,16 +63,16 @@ public class BetterEvaluator implements Evaluator {
         int score = 0;
 
         // Material + Piece-Square Tables
-        score += sumPieces(pawns,   PieceValues.PAWN_VALUE,   PAWN_PST,   isWhite);
-        score += sumPieces(knights, PieceValues.KNIGHT_VALUE, KNIGHT_PST, isWhite);
-        score += sumPieces(bishops, PieceValues.BISHOP_VALUE, BISHOP_PST, isWhite);
-        score += sumPieces(rooks,   PieceValues.ROOK_VALUE,   ROOK_PST,   isWhite);
-        score += sumPieces(queens,  PieceValues.QUEEN_VALUE,  QUEEN_PST,  isWhite);
+        score += sumPieces(pawns,   PieceValues.PAWN_VALUE,   PSTValues.PAWN_PST,   isWhite);
+        score += sumPieces(knights, PieceValues.KNIGHT_VALUE, PSTValues.KNIGHT_PST, isWhite);
+        score += sumPieces(bishops, PieceValues.BISHOP_VALUE, PSTValues.BISHOP_PST, isWhite);
+        score += sumPieces(rooks,   PieceValues.ROOK_VALUE,   PSTValues.ROOK_PST,   isWhite);
+        score += sumPieces(queens,  PieceValues.QUEEN_VALUE,  PSTValues.QUEEN_PST,  isWhite);
 
         // King safety: taper between middlegame and endgame PST
         int kingSq    = board.getKingSquare(colorIndex);
         int kingPstIdx = isWhite ? (kingSq ^ 56) : kingSq;
-        score += (int) (KING_MG_PST[kingPstIdx] * (1 - phase) + KING_EG_PST[kingPstIdx] * phase);
+        score += (int) (PSTValues.KING_MG_PST[kingPstIdx] * (1 - phase) + PSTValues.KING_EG_PST[kingPstIdx] * phase);
 
         // Bishop pair bonus
         if (Long.bitCount(bishops) >= 2) score += BISHOP_PAIR_BONUS;
