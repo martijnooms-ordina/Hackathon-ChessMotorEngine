@@ -6,6 +6,7 @@ import knight.clubbing.movegen.MoveGenerator;
 import knight.clubbing.movegen.PrecomputedMoveData;
 import knight.clubbing.movegen.magic.PrecomputedMagics;
 import sopra.steria.ordering.BadMoveOrderer;
+import sopra.steria.ordering.BetterMoveOrderer;
 import sopra.steria.search.Search;
 import sopra.steria.search.SearchResult;
 import sopra.steria.search.SearchSetting;
@@ -203,8 +204,8 @@ public class Uci {
                 } else {
                     BMove[] someMoves = new MoveGenerator(board).generateMoves(false);
                     if (someMoves.length > 0) {
-                        BadMoveOrderer badMoveOrderer = new BadMoveOrderer();
-                        badMoveOrderer.orderMoves(someMoves, board);
+                        BetterMoveOrderer betterMoveOrderer = new BetterMoveOrderer();
+                        betterMoveOrderer.orderMoves(someMoves, board);
                         sendCommand("bestmove " + someMoves[0].getUci());
                     } else {
                         sendCommand("bestmove 0000");
