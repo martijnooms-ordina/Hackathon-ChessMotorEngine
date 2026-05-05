@@ -3,6 +3,7 @@ package sopra.steria.evaluation;
 import knight.clubbing.core.BBoard;
 import knight.clubbing.core.BBoardHelper;
 import knight.clubbing.core.BPiece;
+import sopra.steria.values.BonusValues;
 import sopra.steria.values.PSTValues;
 import sopra.steria.values.PieceValues;
 
@@ -20,13 +21,6 @@ import sopra.steria.values.PieceValues;
  */
 public class BetterEvaluator implements Evaluator {
 
-    // -------------------------------------------------------------------------
-    // Bonuses / penalties
-    // -------------------------------------------------------------------------
-    private static final int BISHOP_PAIR_BONUS     =  30;
-    private static final int DOUBLED_PAWN_PENALTY  = -20;  // per extra pawn on a file
-    private static final int ISOLATED_PAWN_PENALTY = -15;  // no friendly pawns on adjacent files
-    private static final int PASSED_PAWN_BONUS     =  20;  // multiplied by ranks advanced
 
     /**
      * Maximum non-pawn, non-king material for both sides combined.
@@ -75,7 +69,7 @@ public class BetterEvaluator implements Evaluator {
         score += (int) (PSTValues.KING_MG_PST[kingPstIdx] * (1 - phase) + PSTValues.KING_EG_PST[kingPstIdx] * phase);
 
         // Bishop pair bonus
-        if (Long.bitCount(bishops) >= 2) score += BISHOP_PAIR_BONUS;
+        if (Long.bitCount(bishops) >= 2) score += BonusValues.BISHOP_PAIR_BONUS;
 
         // Pawn structure
         score += evaluatePawnStructure(pawns, isWhite, board);
@@ -113,7 +107,7 @@ public class BetterEvaluator implements Evaluator {
         // per extra pawn (e.g. 2 pawns on same file → 1 penalty).
         for (int file = 0; file < 8; file++) {
             int count = Long.bitCount(pawns & BBoardHelper.FILE_MASKS[file]);
-            if (count > 1) score += (count - 1) * DOUBLED_PAWN_PENALTY;
+            if (count > 1) score += (count - 1) * BonusValues.DOUBLED_PAWN_PENALTY;
         }
 
         // Isolated and passed pawns (iterate over individual pawns)
@@ -128,12 +122,12 @@ public class BetterEvaluator implements Evaluator {
             long adjacentFiles = 0L;
             if (file > 0) adjacentFiles |= BBoardHelper.FILE_MASKS[file - 1];
             if (file < 7) adjacentFiles |= BBoardHelper.FILE_MASKS[file + 1];
-            if ((pawns & adjacentFiles) == 0) score += ISOLATED_PAWN_PENALTY;
+            if ((pawns & adjacentFiles) == 0) score += BonusValues.ISOLATED_PAWN_PENALTY;
 
             // Passed pawn: no opponent pawns on same or adjacent files ahead
             if (isPassedPawn(file, rank, isWhite, opponentPawns)) {
                 int ranksAdvanced = isWhite ? rank : (7 - rank);
-                score += PASSED_PAWN_BONUS * ranksAdvanced;
+                score += BonusValues.PASSED_PAWN_BONUS * ranksAdvanced;
             }
         }
 
