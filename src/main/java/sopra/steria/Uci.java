@@ -5,7 +5,6 @@ import knight.clubbing.core.BMove;
 import knight.clubbing.movegen.MoveGenerator;
 import knight.clubbing.movegen.PrecomputedMoveData;
 import knight.clubbing.movegen.magic.PrecomputedMagics;
-import sopra.steria.ordering.BadMoveOrderer;
 import sopra.steria.ordering.BetterMoveOrderer;
 import sopra.steria.search.Search;
 import sopra.steria.search.SearchResult;
