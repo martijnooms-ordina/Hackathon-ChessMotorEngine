@@ -12,4 +12,6 @@ services:
           memory: 8g
     volumes:
       - ./output:/app/output
+      - ./engines:/app/engines
+      - ./sprt_presets.ini:/app/sprt_presets.ini
     command: ["1.0", "1.0-SNAPSHOT", "fast"] # Parameters for test_sprt.sh
